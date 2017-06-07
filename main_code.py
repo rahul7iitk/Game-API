@@ -186,8 +186,10 @@ def user_move(board):
 			print "Hit at " + str(x+1) + "," + str(y+1)
 			check_sink(board,x,y)
 			board[x][y] = '$'
+			
 			if check_win(board):
 				return "WIN"
+			board = user_move(board)	
 		elif res == "miss":
 			print "Sorry, " + str(x+1) + "," + str(y+1) + " is a miss."
 			board[x][y] = "*"
@@ -211,6 +213,8 @@ def computer_move(board):
 			board[x][y] = '$'
 			if check_win(board):
 				return "WIN"
+			board = computer_move(board)	
+				
 		elif res == "miss":
 			print "Sorry, " + str(x+1) + "," + str(y+1) + " is a miss."
 			board[x][y] = "*"
