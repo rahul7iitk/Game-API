@@ -192,6 +192,7 @@ def get_coor():
 def make_move(board,x,y):
 	
 	#make a move on the board and return the result, hit, miss or try again for repeat hit
+	
 	if board[x][y] == -1:
 		return "miss"
 	elif board[x][y] == '*' or board[x][y] == '$':
@@ -199,12 +200,16 @@ def make_move(board,x,y):
 	else:
 		return "hit"
 
+
+
 def user_move(board):
 	
 	#get coordinates from the user and try to make move
 	#if move is a hit, check ship sunk and win condition
 	while(True):
 		x,y = get_coor()
+		#x = random.randint(0,9)
+		#y = random.randint(0,9)
 		res = make_move(board,x,y)
 		if res == "hit":
 			print "Hit at " + str(x+1) + "," + str(y+1)
@@ -218,7 +223,7 @@ def user_move(board):
 			print "Sorry, " + str(x+1) + "," + str(y+1) + " is a miss."
 			board[x][y] = "*"
 		elif res == "try again":
-			print "Sorry, that coordinate was already hit. Please try again"	
+			print "Sorry, that coordinate was already hit. Please try again"
 
 		if res != "try again":
 			return board
@@ -237,17 +242,22 @@ def computer_move(board,x,y):
 			board[x][y] = '$'
 			if check_win(board):
 				return "WIN"
-			
 
-			'''
+			global current_state,actions
+
+			current_state[0,10*x+y]= 1*(10*x+y in ship_positions)
+			#drawRadar(current_state)
+			actions.append(10*x+y)
+
+			
 			probs = session.run(probabilities,feed_dict={input_layer:current_state})
 			
 			prob = [p * (index not in actions) for index, p in enumerate(probs[0])]
 			prob = [p / sum(prob) for p in prob]
 			current_action = np.argmax(probs)
-			board = computer_move(board)
-			'''
-		
+			board = computer_move(board,current_action/10,current_action%10)
+			
+
 		elif res == "miss":
 			print "Sorry, " + str(x+1) + "," + str(y+1) + " is a miss."
 			board[x][y] = "*"
@@ -460,15 +470,12 @@ with tf.Session() as session:
 		ship_positions=findships(board)
 		flag=0
 		#time.sleep(1.0/1)
-		while(sum(hitlog)<17):
+		while(1):
 			#DISPLAYSURF.fill(bgcolor)
 			
 			#time.sleep(1.0)
 			states.append(copy.deepcopy(current_state))
-			probs = session.run(probabilities,feed_dict={input_layer:current_state})
 			
-			prob = [p * (index not in actions) for index, p in enumerate(probs[0])]
-			prob = [p / sum(prob) for p in prob]
 			#current_action = np.random.choice(100,p=prob)
 
 
@@ -482,13 +489,55 @@ with tf.Session() as session:
 
 			print_board("c",user_board)
 
-			raw_input("To end user turn hit ENTER")
+			#raw_input("To end user turn hit ENTER")
 
 
 
-			current_action = np.argmax(prob)
+			
 
-			board = computer_move(board,current_action/10,current_action%10)
+
+
+			while(True):
+		
+
+				probs = session.run(probabilities,feed_dict={input_layer:current_state})
+			
+				prob = [p * (index not in actions) for index, p in enumerate(probs[0])]
+				prob = [p / sum(prob) for p in prob]
+				current_action = np.random.choice(100,p=prob)
+				print current_action
+
+				res = make_move(board,current_action/10,current_action%10)
+				if res == "hit":
+					print "Hit at " + str(current_action/10+1) + "," + str(current_action%10+1)
+					check_sink(board,current_action/10,current_action%10)
+					board[current_action/10][current_action%10] = '$'
+					if check_win(board):
+						board = "WIN"
+						print "AI WON"
+						quit()
+					print_board("u",board)
+					current_state[0,current_action]= 1*(current_action in ship_positions)
+					#drawRadar(current_state)
+					actions.append(current_action)
+
+			
+					continue
+			
+
+				elif res == "miss":
+					print "Sorry, " + str(current_action/10+1) + "," + str(current_action%10+1) + " is a miss."
+					board[current_action/10][current_action%10] = "*"
+					current_state[0,current_action]= 1*(current_action in ship_positions)
+					#drawRadar(current_state)
+					actions.append(current_action)
+
+				if res != "try again":
+			
+					break
+
+
+
 
 			if(board=="WIN"):
 				print "AI WON"
@@ -496,24 +545,23 @@ with tf.Session() as session:
 
 			print current_action/10,current_action%10
 			print_board("u",board)
-			raw_input("To end computer turn hit ENTER")
+			#raw_input("To end computer turn hit ENTER")
 
 
-
-			hitlog.append(1*(current_action in ship_positions))
-			current_state[0,current_action]= 1*(current_action in ship_positions)
+			#current_state[0,current_action]= 1*(current_action in ship_positions)
 			#drawRadar(current_state)
-			actions.append(current_action)
+			#actions.append(current_action)
 			#pygame.display.update()
 			#FPSCLOCK.tick(FPS)
-		game_lengths.append(len(actions))
-		arr[len(actions)-1]=arr[len(actions)-1]+1
-		reward_log = rewards_calculator(hitlog,actions)
+
+		#game_lengths.append(len(actions))
+		#arr[len(actions)-1]=arr[len(actions)-1]+1
+		#reward_log = rewards_calculator(hitlog,actions)
 		'''for reward ,current_state, action in zip(reward_log,states,actions):
 			session.run(optimizer,feed_dict={input_layer:current_state,labels:[action],learning_rate:0.005* reward})
 		'''
-		print 'game_length--',len(actions),'  avg--',1.0*sum(game_lengths)/len(game_lengths)
-		game_lengths_avg.append(1.0*sum(game_lengths)/len(game_lengths))
+		#print 'game_length--',len(actions),'  avg--',1.0*sum(game_lengths)/len(game_lengths)
+		#game_lengths_avg.append(1.0*sum(game_lengths)/len(game_lengths))
 
 
 	dictt={}
