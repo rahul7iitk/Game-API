@@ -1,59 +1,7 @@
 
-from pprint import pprint
-import pygame,sys
-from pygame.locals import *
 import copy
 import pickle
 import time
-FPS = 1000
-
-windowwidth = 1200
-windowheight = 800
-revealspeed = 8
-boxsize = 50
-gapsize = 5
-boardwidth = 10
-boardheight = 10
-
-xmargin = 300
-ymargin = 100
-
-
-
-white = (255,255,255)
-
-blue = (0,0,255)
-yellow = (255,255,0)
-
-
-cyan = (0,255,255)
-black = (15,15,15)
-
-bgcolor = black
-
-
-
-def leftTopCoordsOfBox(boxx,boxy):
-	left = boxx*(boxsize+gapsize) + xmargin
-	top = boxy*(boxsize+gapsize) + ymargin
-	return (left,top)
-
-def drawRadar(radar1):
-	for x in range(boardwidth):
-		for y in range(boardheight):
-			left,top = leftTopCoordsOfBox(x,y)
-			if radar1[0,10*y+x] == -1:
-				pygame.draw.rect(DISPLAYSURF,cyan,(left,top,boxsize,boxsize))
-			elif radar1[0,10*y+x] == 1:
-				pygame.draw.rect(DISPLAYSURF,blue,(left,top,boxsize,boxsize))
-			elif radar1[0,10*y+x] == 0:
-				pygame.draw.rect(DISPLAYSURF,yellow,(left,top,boxsize,boxsize))
-			
-			left = left + boardwidth*(boxsize+gapsize)
-			
-
-
-
 
 
 import tensorflow as tf
@@ -207,9 +155,9 @@ def user_move(board):
 	#get coordinates from the user and try to make move
 	#if move is a hit, check ship sunk and win condition
 	while(True):
-		x,y = get_coor()
-		#x = random.randint(0,9)
-		#y = random.randint(0,9)
+		#x,y = get_coor()
+		x = random.randint(0,9)
+		y = random.randint(0,9)
 		res = make_move(board,x,y)
 		if res == "hit":
 			print "Hit at " + str(x+1) + "," + str(y+1)
@@ -436,19 +384,8 @@ with tf.Session() as session:
 	game_lengths_avg = []
 	x1 = []
 	arr=[]
-	'''global FPSCLOCK,DISPLAYSURF
-	pygame.init()
-	'''
-	#score = counter
-	'''FPSCLOCK = pygame.time.Clock()
-	DISPLAYSURF=pygame.display.set_mode((windowwidth,windowheight))
-	'''
-	'''
-	DISPLAYSURF.fill(bgcolor)
-	for i in range(10000):
-		x1.append(i+1)
-		arr.append(0)
-	'''
+
+
 	for game in range(1):
 		print game
 		states=[]
@@ -518,7 +455,6 @@ with tf.Session() as session:
 						quit()
 					print_board("u",board)
 					current_state[0,current_action]= 1*(current_action in ship_positions)
-					#drawRadar(current_state)
 					actions.append(current_action)
 
 			
@@ -529,7 +465,7 @@ with tf.Session() as session:
 					print "Sorry, " + str(current_action/10+1) + "," + str(current_action%10+1) + " is a miss."
 					board[current_action/10][current_action%10] = "*"
 					current_state[0,current_action]= 1*(current_action in ship_positions)
-					#drawRadar(current_state)
+					
 					actions.append(current_action)
 
 				if res != "try again":
@@ -545,39 +481,7 @@ with tf.Session() as session:
 
 			print current_action/10,current_action%10
 			print_board("u",board)
-			#raw_input("To end computer turn hit ENTER")
-
-
-			#current_state[0,current_action]= 1*(current_action in ship_positions)
-			#drawRadar(current_state)
-			#actions.append(current_action)
-			#pygame.display.update()
-			#FPSCLOCK.tick(FPS)
-
-		#game_lengths.append(len(actions))
-		#arr[len(actions)-1]=arr[len(actions)-1]+1
-		#reward_log = rewards_calculator(hitlog,actions)
-		'''for reward ,current_state, action in zip(reward_log,states,actions):
-			session.run(optimizer,feed_dict={input_layer:current_state,labels:[action],learning_rate:0.005* reward})
-		'''
-		#print 'game_length--',len(actions),'  avg--',1.0*sum(game_lengths)/len(game_lengths)
-		#game_lengths_avg.append(1.0*sum(game_lengths)/len(game_lengths))
-
-
-	dictt={}
-	dictt['weights1']=session.run(weights1)
-	dictt['weights2']=session.run(weights2)
-	dictt['baises1']=session.run(baises1)
-	dictt['baises2']=session.run(baises2)
-
-'''
-	plt.plot(x1,arr)
-	plt.show()
-'''
-'''
-with open('gameaiweightsnewdist.pickle','wb') as f2:
-    pickle.dump(dictt,f2) 
-'''
+			
 
 
 
