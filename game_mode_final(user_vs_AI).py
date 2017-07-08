@@ -155,9 +155,9 @@ def user_move(board):
 	#get coordinates from the user and try to make move
 	#if move is a hit, check ship sunk and win condition
 	while(True):
-		#x,y = get_coor()
-		x = random.randint(0,9)
-		y = random.randint(0,9)
+		x,y = get_coor()
+		#x = random.randint(0,9)
+		#y = random.randint(0,9)
 		res = make_move(board,x,y)
 		if res == "hit":
 			print "Hit at " + str(x+1) + "," + str(y+1)
